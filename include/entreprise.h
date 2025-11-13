@@ -20,6 +20,7 @@ typedef struct {
 
 #define OPERATION_BENEF 0
 #define OPERATION_DEPENSE 1
+#define OPERATION_LEN 256
 
 typedef struct {
     char *name;
@@ -32,7 +33,7 @@ typedef struct {
 
 typedef struct {
     Mois mois[NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE];
-    Operation operations[256];
+    Operation operations[OPERATION_LEN];
     int nb_operation;
 } Entreprise;
 
@@ -45,9 +46,11 @@ void display_entreprise(const Entreprise *entreprise, int annee);
 
 void __display_operation(const Operation *op, int annee);
 void display_operations(const Entreprise *entreprise, int annee);
+Operation *get_operation_by_name(Entreprise *entreprise, const char *name);
 
 void set_mois_application(Operation *op, int start, int end);
 void add_operation(Entreprise *entreprise, Operation operation);
+void stop_operation(Entreprise *entreprise, char *op_name, int end);
 
 void acheter_une_machine(Entreprise *entreprise, int mois_command);
 void vendre_une_machine(Entreprise *entreprise, int mois_vente);

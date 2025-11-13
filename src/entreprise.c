@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <strings.h>
 
 void init_entreprise(Entreprise *entreprise){
     char* nom_mois[NB_MOIS_DANS_ANNEE] = {"Jan", "Fev", "Mar", "Avr", "Mai", "Juin", "Juil", "Aout", "Sep", "Oct", "Nov", "Dec"};
@@ -30,8 +31,7 @@ void init_mois(Mois *mois, char *nom){
     mois->nb_commerciaux = 0;
 }
 
-void __display_mois(const Mois *mois)
-{
+void __display_mois(const Mois *mois){
     printf("| %-5s | %15.2f | %15.2f | %10d | %10d | %15d | %15d | %10d | %10d |\n",
            mois->nom,
            mois->benef,
@@ -44,8 +44,7 @@ void __display_mois(const Mois *mois)
            mois->nb_commerciaux);
 }
 
-void display_entreprise(const Entreprise *entreprise, int annee)
-{
+void display_entreprise(const Entreprise *entreprise, int annee){
     printf("+-------+-----------------+-----------------+------------+------------+-----------------+-----------------+------------+------------+\n");
     printf("| Mois  |      Benef      |    Depenses     | Ultra Char | Hydro Boat |   Accessoire    |   Aluminium     |  Machine   | Commerciaux|\n");
     printf("+-------+-----------------+-----------------+------------+------------+-----------------+-----------------+------------+------------+\n");
@@ -59,8 +58,7 @@ void display_entreprise(const Entreprise *entreprise, int annee)
     printf("+-------+-----------------+-----------------+------------+------------+-----------------+-----------------+------------+------------+\n");
 }
 
-void __display_operation(const Operation *op, int annee)
-{
+void __display_operation(const Operation *op, int annee){
 
     char *type_str;
     int signe;
@@ -91,8 +89,7 @@ void __display_operation(const Operation *op, int annee)
            op->name, type_str, mois_str, signe * op->value);
 }
 
-void display_operations(const Entreprise *entreprise, int annee)
-{
+void display_operations(const Entreprise *entreprise, int annee) {
     printf("+--------------------------------+----------+----------------------------+----------------------+\n");
     printf("| Nom                            | Type     | Mois d'application         | Valeur               |\n");
     printf("+--------------------------------+----------+----------------------------+----------------------+\n");
@@ -102,6 +99,31 @@ void display_operations(const Entreprise *entreprise, int annee)
     }
 
     printf("+--------------------------------+----------+----------------------------+----------------------+\n");
+}
+
+Operation *get_operation_by_name(Entreprise *entreprise, const char *name) {   
+    Operation *res = NULL;
+    for(int i = 0; i < OPERATION_LEN; i++) {
+        res = &entreprise->operations[i];
+        if(strcmp(res->name, name) == 0)
+            return res;
+    }
+    return NULL;
+}
+
+
+void set_mois_application(Operation *op, int start, int end) {
+    for (int i = 0; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) {
+        op->mois_application[i] = 0;
+    }
+
+
+    if (start < 0) start = 0;
+    if (end > NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE) end = NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE;
+
+    for (int i = start; i < end; i++) {
+        op->mois_application[i] = 1;
+    }
 }
 
 void add_operation(Entreprise *entreprise, Operation operation) {
@@ -135,29 +157,50 @@ void add_operation(Entreprise *entreprise, Operation operation) {
     }
 }
 
-void set_mois_application(Operation *op, int start, int end)
-{
-    for (int i = 0; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) {
-        op->mois_application[i] = 0;
+void stop_operation(Entreprise *entreprise, char *op_name, int end){
+    Operation *op = get_operation_by_name(entreprise, op_name);
+    if(op == NULL) return;
+
+    int nb_mois_total = NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE;
+    int nb_mois_avant = 0;
+    int nb_mois_apres = 0;
+
+    for (int m = 0; m < nb_mois_total; m++) {
+        if (op->mois_application[m])
+            nb_mois_avant++;
     }
 
+    if (nb_mois_avant == 0) return;
 
-    if (start < 0) start = 0;
-    if (end > NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE) end = NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE;
+    float ancienne_value_par_mois = op->value / nb_mois_avant;
 
-    for (int i = start; i < end; i++) {
-        op->mois_application[i] = 1;
+    for (int m = end; m < nb_mois_total; m++) {
+        if (op->mois_application[m]) {
+            op->mois_application[m] = 0;
+
+            Mois *mois = &entreprise->mois[m];
+            if (op->type == OPERATION_BENEF)
+                mois->benef -= ancienne_value_par_mois;
+            else if (op->type == OPERATION_DEPENSE)
+                mois->depense -= ancienne_value_par_mois;
+        }
     }
+
+    for (int m = 0; m < nb_mois_total; m++) {
+        if (op->mois_application[m])
+            nb_mois_apres++;
+    }
+
+    op->value = ancienne_value_par_mois * nb_mois_apres;
 }
 
-void acheter_une_machine(Entreprise *entreprise, int mois_command)
-{
+void acheter_une_machine(Entreprise *entreprise, int mois_command) {
     Operation op;
     op.name = "Achat machine";
     snprintf(op.desc, sizeof(op.desc), "Achat machine fait le mois %d, paiement le mois %d", mois_command, mois_command + 1);
     op.mois_creation = mois_command;
     op.type = OPERATION_DEPENSE;
-    op.value = PRIX_ACHAT_MACHINE;
+    op.value = PRIX_ACHAT_MACHINE * TVA; // * TVA ?
     set_mois_application(&op, mois_command + 1, mois_command + 2);
 
     add_operation(entreprise, op);
@@ -168,8 +211,7 @@ void acheter_une_machine(Entreprise *entreprise, int mois_command)
     }
 }
 
-void vendre_une_machine(Entreprise *entreprise, int mois_vente)
-{
+void vendre_une_machine(Entreprise *entreprise, int mois_vente) {
     Operation op;
     op.name = "Vente machine";
     snprintf(op.desc, sizeof(op.desc), "Vente machine fait le mois %d, paiement le mois %d", mois_vente, mois_vente + 1);
@@ -185,25 +227,32 @@ void vendre_une_machine(Entreprise *entreprise, int mois_vente)
     }
 }
 
-void embaucher_commercial(Entreprise *entreprise, int mois_embauche)
-{
-    Operation op;
-    op.name = "Embauche commercial";
-    snprintf(op.desc, sizeof(op.desc), "Embauche faite le mois %d, coût initial %d€", mois_embauche, COMMERCIAL_COUT_RECRUTEMENT);
-    op.mois_creation = mois_embauche;
-    op.type = OPERATION_DEPENSE;
-    op.value = COMMERCIAL_COUT_RECRUTEMENT;
-    set_mois_application(&op, mois_embauche, mois_embauche + 1);
+void embaucher_commercial(Entreprise *entreprise, int mois_embauche) {
+    Operation embauche;
+    embauche.name = "Embauche commercial";
+    snprintf(embauche.desc, sizeof(embauche.desc), "Embauche faite le mois %d, coût initial %d€", mois_embauche, COMMERCIAL_COUT_RECRUTEMENT);
+    embauche.mois_creation = mois_embauche;
+    embauche.type = OPERATION_DEPENSE;
+    embauche.value = COMMERCIAL_COUT_RECRUTEMENT;
+    set_mois_application(&embauche, mois_embauche, mois_embauche + 1);
 
-    add_operation(entreprise, op);
+    Operation salaire;
+    salaire.name = "Salaire commercial";
+    snprintf(salaire.desc, sizeof(salaire.desc), "Salaire commercial commencant le %d, coût %d€", mois_embauche + 1, COMMERCIAL_SALAIRE_MENSUEL);
+    salaire.mois_creation = mois_embauche + 1;
+    salaire.type = OPERATION_DEPENSE;
+    salaire.value = COMMERCIAL_SALAIRE_MENSUEL * (NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE - mois_embauche - 1) ;
+    set_mois_application(&salaire, mois_embauche + 1, NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE);
+
+    add_operation(entreprise, embauche);
+    add_operation(entreprise, salaire);
 
     for(int i = mois_embauche + 1; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) {
         entreprise->mois[i].nb_commerciaux += 1;
     }
 }
 
-void licencier_commercial(Entreprise *entreprise, int mois_licenciement)
-{
+void licencier_commercial(Entreprise *entreprise, int mois_licenciement) {
     Operation op;
     op.name = "Licenciement commercial";
     snprintf(op.desc, sizeof(op.desc), "Licenciement fait le mois %d, coût initial %d€", mois_licenciement, COMMERCIAL_COUT_LICENCIEMENT);
@@ -217,10 +266,11 @@ void licencier_commercial(Entreprise *entreprise, int mois_licenciement)
     for(int i = mois_licenciement + 1; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) { // TO CHECK
         entreprise->mois[i].nb_commerciaux -= 1;
     }
+
+    stop_operation(entreprise, "Salaire commercial", mois_licenciement + 1); // TO CHECK
 }
 
-void etude_marche_sensibilite_client(Entreprise *entreprise, int mois_achat)
-{
+void etude_marche_sensibilite_client(Entreprise *entreprise, int mois_achat) {
     Operation op;
     op.name = "Etude sensibilite client";
     snprintf(op.desc, sizeof(op.desc), "Etude sensibilite client fait le mois %d, coût %d€", mois_achat, ETUDE_SENSIBILITE_CLIENTS);
@@ -232,8 +282,7 @@ void etude_marche_sensibilite_client(Entreprise *entreprise, int mois_achat)
     add_operation(entreprise, op);
 }
 
-void etude_marche_pub(Entreprise *entreprise, int mois_achat)
-{
+void etude_marche_pub(Entreprise *entreprise, int mois_achat) {
     Operation op;
     op.name = "Etude marche pub";
     snprintf(op.desc, sizeof(op.desc), "Etude marche pub fait le mois %d, coût %d€", mois_achat, ETUDE_PUBLICITE);
@@ -245,8 +294,7 @@ void etude_marche_pub(Entreprise *entreprise, int mois_achat)
     add_operation(entreprise, op);
 }
 
-void pubs(Entreprise *entreprise, int mois_achat, int valeur)
-{
+void pubs(Entreprise *entreprise, int mois_achat, int valeur) {
     Operation op;
     op.name = "Pubs";
     snprintf(op.desc, sizeof(op.desc), "Pubs faite le mois %d, coût %d€", mois_achat, valeur);
