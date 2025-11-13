@@ -51,18 +51,18 @@ int main(){
 
     set_mois_application(&frais_de_structure, 0, NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE);
 
-    // add_operation(&entreprise, capital_depart);
-    // add_operation(&entreprise, terain_locaux);
-    // add_operation(&entreprise, aide_etat);
-    // add_operation(&entreprise, remboursement_aide_etat);
-    // add_operation(&entreprise, frais_de_structure);
+    add_operation(&entreprise, capital_depart);
+    add_operation(&entreprise, terain_locaux);
+    add_operation(&entreprise, aide_etat);
+    add_operation(&entreprise, remboursement_aide_etat);
+    add_operation(&entreprise, frais_de_structure);
     
-    // acheter_une_machine(&entreprise, 0);
+    acheter_une_machine(&entreprise, 0);
     embaucher_commercial(&entreprise, 0);
     embaucher_commercial(&entreprise, 0);
-    // etude_marche_sensibilite_client(&entreprise, 0);
-    // etude_marche_sensibilite_client(&entreprise, 0);
-    // pubs(&entreprise, 0, 12000);
+    etude_marche_sensibilite_client(&entreprise, 0);
+    etude_marche_sensibilite_client(&entreprise, 0);
+    pubs(&entreprise, 0, 12000);
 
     display_operations(&entreprise, 0);
     display_entreprise(&entreprise, 0);

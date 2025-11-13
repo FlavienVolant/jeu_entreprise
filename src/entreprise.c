@@ -195,16 +195,25 @@ void stop_operation(Entreprise *entreprise, char *op_name, int end){
 }
 
 void acheter_une_machine(Entreprise *entreprise, int mois_command) {
-    Operation op;
-    op.name = "Achat machine";
-    snprintf(op.desc, sizeof(op.desc), "Achat machine fait le mois %d, paiement le mois %d", mois_command, mois_command + 1);
-    op.mois_creation = mois_command;
-    op.type = OPERATION_DEPENSE;
-    op.value = PRIX_ACHAT_MACHINE * TVA; // * TVA ?
-    set_mois_application(&op, mois_command + 1, mois_command + 2);
+    
+    Operation achat;
+    achat.name = "Achat machine";
+    snprintf(achat.desc, sizeof(achat.desc), "Achat machine fait le mois %d, paiement le mois %d", mois_command, mois_command + 1);
+    achat.mois_creation = mois_command;
+    achat.type = OPERATION_DEPENSE;
+    achat.value = PRIX_ACHAT_MACHINE; // * TVA ?
+    set_mois_application(&achat, mois_command + 1, mois_command + 2);
 
-    add_operation(entreprise, op);
+    Operation fonctionnement;
+    fonctionnement.name = "Fonctionnement Machine";
+    snprintf(achat.desc, sizeof(achat.desc), "Frais fonctionnement machine commencant le %d, cout %d", mois_command + 1, COUT_FIXE_PAR_MACHINE); // TO CHECK
+    fonctionnement.mois_creation = mois_command + 1;
+    fonctionnement.type = OPERATION_DEPENSE;
+    fonctionnement.value = COUT_FIXE_PAR_MACHINE * (NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE - mois_command - 1);
+    set_mois_application(&fonctionnement, mois_command + 1, NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE);
 
+    add_operation(entreprise, achat);
+    add_operation(entreprise, fonctionnement);
 
     for(int i = mois_command + 1; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) {
         entreprise->mois[i].nb_machine += 1;
@@ -225,6 +234,8 @@ void vendre_une_machine(Entreprise *entreprise, int mois_vente) {
     for(int i = mois_vente + 1; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) { // TO CHECK
         entreprise->mois[i].nb_machine -= 1;
     }
+
+    stop_operation(entreprise, "Fonctionnement Machine", mois_vente + 1); // TO CHECK
 }
 
 void embaucher_commercial(Entreprise *entreprise, int mois_embauche) {
@@ -238,7 +249,7 @@ void embaucher_commercial(Entreprise *entreprise, int mois_embauche) {
 
     Operation salaire;
     salaire.name = "Salaire commercial";
-    snprintf(salaire.desc, sizeof(salaire.desc), "Salaire commercial commencant le %d, coût %d€", mois_embauche + 1, COMMERCIAL_SALAIRE_MENSUEL);
+    snprintf(salaire.desc, sizeof(salaire.desc), "Salaire commercial commencant le %d, cout %d€", mois_embauche + 1, COMMERCIAL_SALAIRE_MENSUEL);
     salaire.mois_creation = mois_embauche + 1;
     salaire.type = OPERATION_DEPENSE;
     salaire.value = COMMERCIAL_SALAIRE_MENSUEL * (NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE - mois_embauche - 1) ;
