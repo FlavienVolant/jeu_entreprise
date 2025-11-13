@@ -249,6 +249,38 @@ void vendre_une_machine(Entreprise *entreprise, int mois_vente) {
     stop_operation(entreprise, "Fonctionnement Machine", mois_vente + 1); // TO CHECK
 }
 
+void acheter_aluminium(Entreprise *entreprise, const Fournisseur *fournisseur, int mois_command, int lot){
+    Operation achat;
+    achat.name = "Achat aluminium";
+    snprintf(achat.desc, sizeof(achat.desc), "Achat %i lots d'alu fait le mois %d, paiement le mois %d", lot, mois_command, mois_command + fournisseur->delai_de_paiement);
+    achat.mois_creation = mois_command;
+    achat.type = OPERATION_DEPENSE;
+    achat.value = lot * prix_lot_aluminium(fournisseur);
+    set_mois_application(&achat, mois_command + fournisseur->delai_de_paiement, mois_command + fournisseur->delai_de_paiement + 1);
+
+    add_operation(entreprise, achat);
+
+    for(int i = mois_command + 1; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) { // TO CHECK
+        entreprise->mois[i].nb_aluminium += lot * fournisseur->taille_lot_aluminium;
+    }
+}
+
+void acheter_accessoire(Entreprise *entreprise, const Fournisseur *fournisseur, int mois_command, int lot) {
+    Operation achat;
+    achat.name = "Achat accessoire";
+    snprintf(achat.desc, sizeof(achat.desc), "Achat %i lots d'acc fait le mois %d, paiement le mois %d", lot, mois_command, mois_command + fournisseur->delai_de_paiement);
+    achat.mois_creation = mois_command;
+    achat.type = OPERATION_DEPENSE;
+    achat.value = lot * prix_lot_accessoires(fournisseur);
+    set_mois_application(&achat, mois_command + fournisseur->delai_de_paiement, mois_command + fournisseur->delai_de_paiement + 1);
+
+    add_operation(entreprise, achat);
+
+    for(int i = mois_command + 1; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) { // TO CHECK
+        entreprise->mois[i].nb_accessoire += lot * fournisseur->taille_lot_accessoires;
+    }
+}
+
 void embaucher_commercial(Entreprise *entreprise, int mois_embauche) {
     Operation embauche;
     embauche.name = "Embauche commercial";

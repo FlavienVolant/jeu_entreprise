@@ -1,5 +1,7 @@
-#ifndef USER_H
-#define USER_H
+#ifndef ENTREPRISE_H
+#define ENTREPRISE_H
+
+#include "fournisseurs.h"
 
 #define TVA 1.2
 #define FRAIS_DE_STRUCTURE 18000
@@ -56,6 +58,9 @@ void stop_operation(Entreprise *entreprise, char *op_name, int end);
 
 void acheter_une_machine(Entreprise *entreprise, int mois_command);
 void vendre_une_machine(Entreprise *entreprise, int mois_vente);
+
+void acheter_aluminium(Entreprise *entreprise, const Fournisseur *fournisseur, int mois_command, int lot);
+void acheter_accessoire(Entreprise *entreprise, const Fournisseur *fournisseur, int mois_command, int lot);
 
 void embaucher_commercial(Entreprise *entreprise, int mois_embauche);
 void licencier_commercial(Entreprise *entreprise, int mois_licenciement);

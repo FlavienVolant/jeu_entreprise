@@ -1,6 +1,7 @@
 #include "stdio.h"
 #include "entreprise.h"
 #include "outils_de_production.h"
+#include "fournisseurs.h"
 
 int main(){
 
@@ -63,6 +64,9 @@ int main(){
     etude_marche_sensibilite_client(&entreprise, 0);
     etude_marche_sensibilite_client(&entreprise, 0);
     pubs(&entreprise, 0, 12000);
+
+    acheter_accessoire(&entreprise, &FourniStyl, 1, 2);
+    acheter_aluminium(&entreprise, &FourniStyl, 1, 2);
 
     display_operations(&entreprise, 0);
     display_entreprise(&entreprise, 0, 0);
