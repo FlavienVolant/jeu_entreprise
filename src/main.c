@@ -65,7 +65,7 @@ int main(){
     pubs(&entreprise, 0, 12000);
 
     display_operations(&entreprise, 0);
-    display_entreprise(&entreprise, 0);
+    display_entreprise(&entreprise, 0, 0);
 
     return 0;
 }

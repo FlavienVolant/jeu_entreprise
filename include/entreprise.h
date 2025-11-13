@@ -41,8 +41,10 @@ typedef struct {
 void init_entreprise(Entreprise *Entreprise);
 void init_mois(Mois *mois, char *nom);
 
-void __display_mois(const Mois *mois);
-void display_entreprise(const Entreprise *entreprise, int annee);
+float get_balance(const Mois *mois);
+
+void __display_mois(const Mois *mois, float* capital);
+void display_entreprise(const Entreprise *entreprise, int annee, float capital);
 
 void __display_operation(const Operation *op, int annee);
 void display_operations(const Entreprise *entreprise, int annee);

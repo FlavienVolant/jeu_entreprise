@@ -31,11 +31,20 @@ void init_mois(Mois *mois, char *nom){
     mois->nb_commerciaux = 0;
 }
 
-void __display_mois(const Mois *mois){
-    printf("| %-5s | %15.2f | %15.2f | %10d | %10d | %15d | %15d | %10d | %10d |\n",
+float get_balance(const Mois *mois){
+    return mois->benef - mois->depense;
+}
+
+void __display_mois(const Mois *mois, float *capital) {
+    float balance = get_balance(mois);
+    *capital += balance; // le capital augmente si balance > 0
+
+    printf("| %-5s | %15.2f | %15.2f | %15.2f | %15.2f | %10d | %10d | %15d | %15d | %10d | %10d |\n",
            mois->nom,
            mois->benef,
            mois->depense,
+           balance,
+           *capital,
            mois->nb_ultra_char,
            mois->nb_hydroboat,
            mois->nb_accessoire,
@@ -44,18 +53,20 @@ void __display_mois(const Mois *mois){
            mois->nb_commerciaux);
 }
 
-void display_entreprise(const Entreprise *entreprise, int annee){
-    printf("+-------+-----------------+-----------------+------------+------------+-----------------+-----------------+------------+------------+\n");
-    printf("| Mois  |      Benef      |    Depenses     | Ultra Char | Hydro Boat |   Accessoire    |   Aluminium     |  Machine   | Commerciaux|\n");
-    printf("+-------+-----------------+-----------------+------------+------------+-----------------+-----------------+------------+------------+\n");
+void display_entreprise(const Entreprise *entreprise, int annee, float capital_depart) {
+    printf("+-------+-----------------+-----------------+-----------------+-----------------+------------+------------+-----------------+-----------------+------------+------------+\n");
+    printf("| Mois  |      Benef      |    Depenses     |     Balance     |     Capital     | Ultra Char | Hydro Boat |   Accessoire    |   Aluminium     |  Machine   | Commerciaux|\n");
+    printf("+-------+-----------------+-----------------+-----------------+-----------------+------------+------------+-----------------+-----------------+------------+------------+\n");
+
+    float capital = capital_depart;
 
     int start = annee * NB_MOIS_DANS_ANNEE;
     int end = start + NB_MOIS_DANS_ANNEE;
     for (int i = start; i < end; i++) {
-        __display_mois(&entreprise->mois[i]);
+        __display_mois(&entreprise->mois[i], &capital);
     }
 
-    printf("+-------+-----------------+-----------------+------------+------------+-----------------+-----------------+------------+------------+\n");
+    printf("+-------+-----------------+-----------------+-----------------+-----------------+------------+------------+-----------------+-----------------+------------+------------+\n");
 }
 
 void __display_operation(const Operation *op, int annee){
