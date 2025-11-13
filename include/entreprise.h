@@ -55,4 +55,9 @@ void vendre_une_machine(Entreprise *entreprise, int mois_vente);
 void embaucher_commercial(Entreprise *entreprise, int mois_embauche);
 void licencier_commercial(Entreprise *entreprise, int mois_licenciement);
 
+void etude_marche_sensibilite_client(Entreprise *entreprise, int mois_achat);
+void etude_marche_pub(Entreprise *entreprise, int mois_achat);
+
+void pubs(Entreprise *entreprise, int mois_achat, int valeur);
+
 #endif

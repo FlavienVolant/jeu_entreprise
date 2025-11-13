@@ -2,6 +2,7 @@
 
 #include "commercial.h"
 #include "outils_de_production.h"
+#include "etude_de_marche.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -204,8 +205,8 @@ void embaucher_commercial(Entreprise *entreprise, int mois_embauche)
 void licencier_commercial(Entreprise *entreprise, int mois_licenciement)
 {
     Operation op;
-    op.name = "Liceciement commercial";
-    snprintf(op.desc, sizeof(op.desc), "Liceciement fait le mois %d, coût initial %d€", mois_licenciement, COMMERCIAL_COUT_LICENCIEMENT);
+    op.name = "Licenciement commercial";
+    snprintf(op.desc, sizeof(op.desc), "Licenciement fait le mois %d, coût initial %d€", mois_licenciement, COMMERCIAL_COUT_LICENCIEMENT);
     op.mois_creation = mois_licenciement;
     op.type = OPERATION_DEPENSE; // TO CHECK
     op.value = COMMERCIAL_COUT_LICENCIEMENT;
@@ -216,4 +217,43 @@ void licencier_commercial(Entreprise *entreprise, int mois_licenciement)
     for(int i = mois_licenciement + 1; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) { // TO CHECK
         entreprise->mois[i].nb_commerciaux -= 1;
     }
+}
+
+void etude_marche_sensibilite_client(Entreprise *entreprise, int mois_achat)
+{
+    Operation op;
+    op.name = "Etude sensibilite client";
+    snprintf(op.desc, sizeof(op.desc), "Etude sensibilite client fait le mois %d, coût %d€", mois_achat, ETUDE_SENSIBILITE_CLIENTS);
+    op.mois_creation = mois_achat;
+    op.type = OPERATION_DEPENSE;
+    op.value = ETUDE_SENSIBILITE_CLIENTS;
+    set_mois_application(&op, mois_achat, mois_achat + 1);
+
+    add_operation(entreprise, op);
+}
+
+void etude_marche_pub(Entreprise *entreprise, int mois_achat)
+{
+    Operation op;
+    op.name = "Etude marche pub";
+    snprintf(op.desc, sizeof(op.desc), "Etude marche pub fait le mois %d, coût %d€", mois_achat, ETUDE_PUBLICITE);
+    op.mois_creation = mois_achat;
+    op.type = OPERATION_DEPENSE;
+    op.value = ETUDE_PUBLICITE;
+    set_mois_application(&op, mois_achat, mois_achat + 1);
+
+    add_operation(entreprise, op);
+}
+
+void pubs(Entreprise *entreprise, int mois_achat, int valeur)
+{
+    Operation op;
+    op.name = "Pubs";
+    snprintf(op.desc, sizeof(op.desc), "Pubs faite le mois %d, coût %d€", mois_achat, valeur);
+    op.mois_creation = mois_achat;
+    op.type = OPERATION_DEPENSE;
+    op.value = valeur;
+    set_mois_application(&op, mois_achat, mois_achat + 1);
+
+    add_operation(entreprise, op);
 }
