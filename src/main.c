@@ -71,9 +71,51 @@ int main(){
 
     vendre_ultra_char(&entreprise, 3, 45, 35, 300);
 
-    display_operations(&entreprise, 2);
-    display_operations_annee_mois(&entreprise, 0, 1);
-    display_entreprise(&entreprise, 0, 0);
+
+    int choix = -1;
+    int running = 1;
+    while (running) {
+        printf("\nQue veux-tu afficher ?\n");
+        printf("  0 - Display entreprise\n");
+        printf("  1 - Display operations\n");
+        printf("  2 - Display operations pour un mois precis\n");
+        printf("  3 - Exit\n");
+        printf("Ton choix : ");
+
+        if (scanf("%d", &choix) != 1) {
+            while (getchar() != '\n');
+            printf("Entrée invalide. Réessaie.\n");
+            continue;
+        }
+
+        switch (choix)
+        {
+        case 0:
+            display_entreprise(&entreprise, 0, 1);
+            break;
+        case 1:
+            display_operations(&entreprise, 0);
+            break;
+        case 2:
+            int mois;
+            printf("Quel mois veux-tu afficher ? [0; 11] : ");
+
+            if (scanf("%d", &mois) != 1 || mois < 0 || mois > 11) {
+                while (getchar() != '\n');
+                printf("Mois invalide.\n");
+                continue;
+            }
+
+            display_operations_annee_mois(&entreprise, 0, mois);
+            break;
+        case 3:
+            running = 0;
+            break;
+        default:
+            printf("Choix invalide. Tape 0, 1 ou 2.\n");
+            break;
+        }
+    }
 
     return 0;
 }
