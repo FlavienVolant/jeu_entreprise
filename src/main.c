@@ -67,6 +67,9 @@ int main(){
 
     acheter_accessoire(&entreprise, &FourniStyl, 1, 2);
     acheter_aluminium(&entreprise, &FourniStyl, 1, 2);
+    produire_ultra_char(&entreprise, 2, 500);
+
+    vendre_ultra_char(&entreprise, 3, 45, 35, 300);
 
     display_operations(&entreprise, 0);
     display_entreprise(&entreprise, 0, 0);

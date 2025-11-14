@@ -24,7 +24,7 @@ void init_mois(Mois *mois, char *nom){
     mois->benef = 0;
     mois->depense = 0;
     mois->nb_ultra_char = 0;
-    mois->nb_hydroboat = 0;
+    mois->nb_hydro_boat = 0;
     mois->nb_accessoire = 0;
     mois->nb_aluminium = 0;
     mois->nb_machine = 0;
@@ -46,7 +46,7 @@ void __display_mois(const Mois *mois, float *capital) {
            balance,
            *capital,
            mois->nb_ultra_char,
-           mois->nb_hydroboat,
+           mois->nb_hydro_boat,
            mois->nb_accessoire,
            mois->nb_aluminium,
            mois->nb_machine,
@@ -247,6 +247,96 @@ void vendre_une_machine(Entreprise *entreprise, int mois_vente) {
     }
 
     stop_operation(entreprise, "Fonctionnement Machine", mois_vente + 1); // TO CHECK
+}
+
+void produire_ultra_char(Entreprise *entreprise, int mois_production, int qt){
+    int qt_aluminiums = qt * ultra_char.conso_aluminium;
+    int qt_accessoires = qt * ultra_char.conso_accessoires;
+    
+    for(int i = mois_production; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) {
+        entreprise->mois[i].nb_aluminium -= qt_aluminiums;
+        entreprise->mois[i].nb_accessoire -= qt_accessoires;
+        entreprise->mois[i].nb_ultra_char += qt;
+    }
+}
+
+void produire_hydro_boat(Entreprise *entreprise, int mois_production, int qt){
+    int qt_aluminiums = qt * ultra_char.conso_aluminium;
+    int qt_accessoires = qt * ultra_char.conso_accessoires;
+    
+    for(int i = mois_production; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) {
+        entreprise->mois[i].nb_aluminium -= qt_aluminiums;
+        entreprise->mois[i].nb_accessoire -= qt_accessoires;
+        entreprise->mois[i].nb_hydro_boat += qt;
+    }
+}
+
+void vendre_ultra_char(Entreprise *entreprise, int mois_vente, int delai_de_paiement, int prix_de_vente, int qt){
+    int total = (prix_de_vente - ultra_char.cout_logistique) * qt;
+
+    Operation vente;
+    vente.name = "Vente ultra char";
+    snprintf(vente.desc, sizeof(vente.desc), "Vente %i ultra char fait le mois %d (total: %de), delai de paiement %d", qt, mois_vente, total, delai_de_paiement);
+    vente.mois_creation = mois_vente;
+    vente.type = OPERATION_BENEF;
+    vente.value = total;
+    switch (delai_de_paiement){
+    case 0:
+        set_mois_application(&vente, mois_vente, mois_vente + 1);
+        break;
+    
+    case 30:
+        set_mois_application(&vente, mois_vente + 1, mois_vente + 2);
+        break;
+    
+    case 45:
+        set_mois_application(&vente, mois_vente + 1, mois_vente + 3);
+        break;
+
+    case 60:
+        set_mois_application(&vente, mois_vente + 2, mois_vente + 3);
+        break;
+    }
+
+    add_operation(entreprise, vente);
+
+    for(int i = mois_vente; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i ++) {
+        entreprise->mois[i].nb_ultra_char -= qt;
+    }
+}
+
+void vendre_hydro_boat(Entreprise *entreprise, int mois_vente, int delai_de_paiement, int prix_de_vente, int qt){
+    int total = (prix_de_vente - hydro_boat.cout_logistique) * qt;
+
+    Operation vente;
+    vente.name = "Vente hydro boat";
+    snprintf(vente.desc, sizeof(vente.desc), "Vente %i hydro boat fait le mois %d (total: %de), delai de paiement %d", qt, mois_vente, total, delai_de_paiement);
+    vente.mois_creation = mois_vente;
+    vente.type = OPERATION_BENEF;
+    vente.value = total;
+    switch (delai_de_paiement){
+    case 0:
+        set_mois_application(&vente, mois_vente, mois_vente + 1);
+        break;
+    
+    case 30:
+        set_mois_application(&vente, mois_vente + 1, mois_vente + 2);
+        break;
+    
+    case 45:
+        set_mois_application(&vente, mois_vente + 1, mois_vente + 3);
+        break;
+
+    case 60:
+        set_mois_application(&vente, mois_vente + 2, mois_vente + 3);
+        break;
+    }
+
+    add_operation(entreprise, vente);
+
+    for(int i = mois_vente; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i ++) {
+        entreprise->mois[i].nb_hydro_boat -= qt;
+    }
 }
 
 void acheter_aluminium(Entreprise *entreprise, const Fournisseur *fournisseur, int mois_command, int lot){

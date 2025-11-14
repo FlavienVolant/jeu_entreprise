@@ -1,7 +1,7 @@
 # === Configuration ===
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11 -Iinclude
-SRC = src/main.c src/entreprise.c src/fournisseurs.c
+SRC = src/main.c src/entreprise.c src/fournisseurs.c src/nomenclature.c
 BIN = programme.exe
 
 # === Compilation ===
