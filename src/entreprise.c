@@ -100,7 +100,27 @@ void __display_operation(const Operation *op, int annee){
            op->name, type_str, mois_str, signe * op->value);
 }
 
+void display_operations_annee_mois(const Entreprise *entreprise, int annee, int mois){
+    
+    printf("+--------------------------------+\n");
+    printf("| Annee: %-1d, Mois: %-2d             |\n", annee, mois);
+    printf("+--------------------------------+----------+----------------------------+----------------------+\n");
+    printf("| Nom                            | Type     | Mois d'application         | Valeur               |\n");
+    printf("+--------------------------------+----------+----------------------------+----------------------+\n");
+
+    int vrai_mois = (annee + 1) * mois;
+    for (int i = 0; i < entreprise->nb_operation; i++) {
+        if(entreprise->operations[i].mois_creation == vrai_mois)
+            __display_operation(&entreprise->operations[i], annee);
+    }
+
+    printf("+--------------------------------+----------+----------------------------+----------------------+\n");
+}
+
 void display_operations(const Entreprise *entreprise, int annee) {
+
+    printf("+--------------------------------+\n");
+    printf("| Annee: %-1d                       |\n", annee);
     printf("+--------------------------------+----------+----------------------------+----------------------+\n");
     printf("| Nom                            | Type     | Mois d'application         | Valeur               |\n");
     printf("+--------------------------------+----------+----------------------------+----------------------+\n");

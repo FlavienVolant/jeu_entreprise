@@ -50,6 +50,7 @@ void __display_mois(const Mois *mois, float* capital);
 void display_entreprise(const Entreprise *entreprise, int annee, float capital);
 
 void __display_operation(const Operation *op, int annee);
+void display_operations_annee_mois(const Entreprise *entreprise, int annee, int mois);
 void display_operations(const Entreprise *entreprise, int annee);
 Operation *get_operation_by_name(Entreprise *entreprise, const char *name);
 
