@@ -236,8 +236,8 @@ void acheter_une_machine(Entreprise *entreprise, int mois_command) {
     set_mois_application(&achat, mois_command + 1, mois_command + 2);
 
     Operation fonctionnement;
-    fonctionnement.name = "Fonctionnement Machine";
-    snprintf(achat.desc, sizeof(achat.desc), "Frais fonctionnement machine commencant le %d, cout %d", mois_command + 1, COUT_FIXE_PAR_MACHINE); // TO CHECK
+    fonctionnement.name = "Cout fixe machine";
+    snprintf(achat.desc, sizeof(achat.desc), "Cout fixe machine commencant le %d, cout %d", mois_command + 1, COUT_FIXE_PAR_MACHINE); // TO CHECK
     fonctionnement.mois_creation = mois_command + 1;
     fonctionnement.type = OPERATION_DEPENSE;
     fonctionnement.value = COUT_FIXE_PAR_MACHINE * (NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE - mois_command - 1);
@@ -266,29 +266,46 @@ void vendre_une_machine(Entreprise *entreprise, int mois_vente) {
         entreprise->mois[i].nb_machine -= 1;
     }
 
-    stop_operation(entreprise, "Fonctionnement Machine", mois_vente + 1); // TO CHECK
+    stop_operation(entreprise, "Cout fixe machine", mois_vente + 1); // TO CHECK
+}
+
+void __produire(Entreprise *entreprise, const Nomenclature *product, int mois_production, int qt) {
+    int qt_aluminiums = qt * ultra_char.conso_aluminium;
+    int qt_accessoires = qt * ultra_char.conso_accessoires;
+    int temps_production = qt  * ultra_char.temps_de_production;
+    
+    for(int i = mois_production; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) {
+        entreprise->mois[i].nb_aluminium -= qt_aluminiums;
+        entreprise->mois[i].nb_accessoire -= qt_accessoires;
+        switch (product->type){
+            case TYPE_ULTRA_CHAR:
+                entreprise->mois[i].nb_ultra_char += qt;
+                break;
+            case TYPE_HYDRO_BOAT:
+                entreprise->mois[i].nb_hydro_boat += qt;
+                break;
+            default:
+                break;
+        }
+    }
+
+    Operation coutVariable;
+    coutVariable.name = "Cout variables 9e/h";
+    snprintf(coutVariable.desc, sizeof(coutVariable.desc), "Cout variables 9e/h pendant %d heure de la machine fait le mois %d", temps_production, mois_production);
+    coutVariable.mois_creation = mois_production;
+    coutVariable.type = OPERATION_DEPENSE;
+    coutVariable.value = COUT_VARIABLE_PAR_HEURE * temps_production;
+    set_mois_application(&coutVariable, mois_production, mois_production + 1);
+
+    add_operation(entreprise, coutVariable);
 }
 
 void produire_ultra_char(Entreprise *entreprise, int mois_production, int qt){
-    int qt_aluminiums = qt * ultra_char.conso_aluminium;
-    int qt_accessoires = qt * ultra_char.conso_accessoires;
-    
-    for(int i = mois_production; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) {
-        entreprise->mois[i].nb_aluminium -= qt_aluminiums;
-        entreprise->mois[i].nb_accessoire -= qt_accessoires;
-        entreprise->mois[i].nb_ultra_char += qt;
-    }
+    __produire(entreprise, &ultra_char, mois_production, qt);
 }
 
 void produire_hydro_boat(Entreprise *entreprise, int mois_production, int qt){
-    int qt_aluminiums = qt * ultra_char.conso_aluminium;
-    int qt_accessoires = qt * ultra_char.conso_accessoires;
-    
-    for(int i = mois_production; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) {
-        entreprise->mois[i].nb_aluminium -= qt_aluminiums;
-        entreprise->mois[i].nb_accessoire -= qt_accessoires;
-        entreprise->mois[i].nb_hydro_boat += qt;
-    }
+    __produire(entreprise, &hydro_boat, mois_production, qt);
 }
 
 void vendre_ultra_char(Entreprise *entreprise, int mois_vente, int delai_de_paiement, int prix_de_vente, int qt){
