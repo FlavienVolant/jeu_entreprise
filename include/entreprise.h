@@ -4,7 +4,7 @@
 #include "fournisseurs.h"
 #include "nomenclature.h"
 
-#define TVA 1.2
+#define TVA 1.2f
 #define FRAIS_DE_STRUCTURE 18000
 #define NB_ANNEE_JOUE 5
 #define NB_MOIS_DANS_ANNEE 12
