@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 
 void init_entreprise(Entreprise *entreprise){
     char* nom_mois[NB_MOIS_DANS_ANNEE] = {"Jan", "Fev", "Mar", "Avr", "Mai", "Juin", "Juil", "Aout", "Sep", "Oct", "Nov", "Dec"};
@@ -110,8 +110,11 @@ void display_operations_annee_mois(const Entreprise *entreprise, int annee, int 
 
     int vrai_mois = (annee + 1) * mois;
     for (int i = 0; i < entreprise->nb_operation; i++) {
-        if(entreprise->operations[i].mois_creation == vrai_mois)
-            __display_operation(&entreprise->operations[i], annee);
+
+        Operation op = entreprise->operations[i];
+
+        if(op.mois_application[vrai_mois] == 1)
+            __display_operation(&op, annee);
     }
 
     printf("+--------------------------------+----------+----------------------------+----------------------+\n");
@@ -232,7 +235,7 @@ void acheter_une_machine(Entreprise *entreprise, int mois_command) {
     snprintf(achat.desc, sizeof(achat.desc), "Achat machine fait le mois %d, paiement le mois %d", mois_command, mois_command + 1);
     achat.mois_creation = mois_command;
     achat.type = OPERATION_DEPENSE;
-    achat.value = PRIX_ACHAT_MACHINE; // * TVA ?
+    achat.value = PRIX_ACHAT_MACHINE * TVA;
     set_mois_application(&achat, mois_command + 1, mois_command + 2);
 
     Operation fonctionnement;
@@ -240,7 +243,7 @@ void acheter_une_machine(Entreprise *entreprise, int mois_command) {
     snprintf(achat.desc, sizeof(achat.desc), "Cout fixe machine commencant le %d, cout %d", mois_command + 1, COUT_FIXE_PAR_MACHINE); // TO CHECK
     fonctionnement.mois_creation = mois_command + 1;
     fonctionnement.type = OPERATION_DEPENSE;
-    fonctionnement.value = COUT_FIXE_PAR_MACHINE * (NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE - mois_command - 1);
+    fonctionnement.value = COUT_FIXE_PAR_MACHINE * (NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE - (mois_command + 1));
     set_mois_application(&fonctionnement, mois_command + 1, NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE);
 
     add_operation(entreprise, achat);
@@ -270,9 +273,9 @@ void vendre_une_machine(Entreprise *entreprise, int mois_vente) {
 }
 
 void __produire(Entreprise *entreprise, const Nomenclature *product, int mois_production, int qt) {
-    int qt_aluminiums = qt * ultra_char.conso_aluminium;
-    int qt_accessoires = qt * ultra_char.conso_accessoires;
-    int temps_production = qt  * ultra_char.temps_de_production;
+    int qt_aluminiums = qt * product->conso_aluminium;
+    int qt_accessoires = qt * product->conso_accessoires;
+    int temps_production = qt  * product->temps_de_production;
     
     for(int i = mois_production; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) {
         entreprise->mois[i].nb_aluminium -= qt_aluminiums;
@@ -290,11 +293,11 @@ void __produire(Entreprise *entreprise, const Nomenclature *product, int mois_pr
     }
 
     Operation coutVariable;
-    coutVariable.name = "Cout variables 9e/h";
-    snprintf(coutVariable.desc, sizeof(coutVariable.desc), "Cout variables 9e/h pendant %d heure de la machine fait le mois %d", temps_production, mois_production);
+    coutVariable.name = "Fabrication 9e/h";
+    snprintf(coutVariable.desc, sizeof(coutVariable.desc), "Fabrication 9e/h pendant %d heure de la machine fait le mois %d", temps_production, mois_production);
     coutVariable.mois_creation = mois_production;
     coutVariable.type = OPERATION_DEPENSE;
-    coutVariable.value = COUT_VARIABLE_PAR_HEURE * temps_production;
+    coutVariable.value = COUT_VARIABLE_PAR_HEURE * temps_production * TVA;
     set_mois_application(&coutVariable, mois_production, mois_production + 1);
 
     add_operation(entreprise, coutVariable);
@@ -309,7 +312,16 @@ void produire_hydro_boat(Entreprise *entreprise, int mois_production, int qt){
 }
 
 void vendre_ultra_char(Entreprise *entreprise, int mois_vente, int delai_de_paiement, int prix_de_vente, int qt){
-    int total = (prix_de_vente - ultra_char.cout_logistique) * qt;
+    int total = prix_de_vente * qt * TVA;
+    int log = ultra_char.cout_logistique * qt * TVA;
+
+    Operation logistique;
+    logistique.name = "Logistique ultra char";
+    snprintf(logistique.desc, sizeof(logistique.desc), "Logistique vente %i ultra char fait le mois %d (total: %de)", qt, mois_vente, log);
+    logistique.mois_creation = mois_vente;
+    logistique.type = OPERATION_DEPENSE;
+    logistique.value = log;
+    set_mois_application(&logistique, mois_vente, mois_vente + 1);
 
     Operation vente;
     vente.name = "Vente ultra char";
@@ -336,6 +348,7 @@ void vendre_ultra_char(Entreprise *entreprise, int mois_vente, int delai_de_paie
     }
 
     add_operation(entreprise, vente);
+    add_operation(entreprise, logistique);
 
     for(int i = mois_vente; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i ++) {
         entreprise->mois[i].nb_ultra_char -= qt;
@@ -343,7 +356,16 @@ void vendre_ultra_char(Entreprise *entreprise, int mois_vente, int delai_de_paie
 }
 
 void vendre_hydro_boat(Entreprise *entreprise, int mois_vente, int delai_de_paiement, int prix_de_vente, int qt){
-    int total = (prix_de_vente - hydro_boat.cout_logistique) * qt;
+    int total = prix_de_vente * qt * TVA;
+    int log = hydro_boat.cout_logistique * qt * TVA;
+
+    Operation logistique;
+    logistique.name = "Logistique hydroboat";
+    snprintf(logistique.desc, sizeof(logistique.desc), "Logistique vente %i hydroboat fait le mois %d (total: %de)", qt, mois_vente, log);
+    logistique.mois_creation = mois_vente;
+    logistique.type = OPERATION_DEPENSE;
+    logistique.value = log;
+    set_mois_application(&logistique, mois_vente, mois_vente + 1);
 
     Operation vente;
     vente.name = "Vente hydro boat";
@@ -370,6 +392,7 @@ void vendre_hydro_boat(Entreprise *entreprise, int mois_vente, int delai_de_paie
     }
 
     add_operation(entreprise, vente);
+    add_operation(entreprise, logistique);
 
     for(int i = mois_vente; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i ++) {
         entreprise->mois[i].nb_hydro_boat -= qt;
@@ -379,15 +402,15 @@ void vendre_hydro_boat(Entreprise *entreprise, int mois_vente, int delai_de_paie
 void acheter_aluminium(Entreprise *entreprise, const Fournisseur *fournisseur, int mois_command, int lot){
     Operation achat;
     achat.name = "Achat aluminium";
-    snprintf(achat.desc, sizeof(achat.desc), "Achat %i lots d'alu fait le mois %d, paiement le mois %d", lot, mois_command, mois_command + fournisseur->delai_de_paiement);
+    snprintf(achat.desc, sizeof(achat.desc), "Achat %i lots d'alu fait le mois %d, paiement le mois %d", lot, mois_command, mois_command + 1 + fournisseur->delai_de_paiement);
     achat.mois_creation = mois_command;
     achat.type = OPERATION_DEPENSE;
     achat.value = lot * prix_lot_aluminium(fournisseur);
-    set_mois_application(&achat, mois_command + fournisseur->delai_de_paiement, mois_command + fournisseur->delai_de_paiement + 1);
+    set_mois_application(&achat, mois_command + 1 + fournisseur->delai_de_paiement, mois_command + fournisseur->delai_de_paiement + 2);
 
     add_operation(entreprise, achat);
 
-    for(int i = mois_command + 1; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) { // TO CHECK
+    for(int i = mois_command + 1; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) {
         entreprise->mois[i].nb_aluminium += lot * fournisseur->taille_lot_aluminium;
     }
 }
@@ -395,15 +418,15 @@ void acheter_aluminium(Entreprise *entreprise, const Fournisseur *fournisseur, i
 void acheter_accessoire(Entreprise *entreprise, const Fournisseur *fournisseur, int mois_command, int lot) {
     Operation achat;
     achat.name = "Achat accessoire";
-    snprintf(achat.desc, sizeof(achat.desc), "Achat %i lots d'acc fait le mois %d, paiement le mois %d", lot, mois_command, mois_command + fournisseur->delai_de_paiement);
+    snprintf(achat.desc, sizeof(achat.desc), "Achat %i lots d'acc fait le mois %d, paiement le mois %d", lot, mois_command, mois_command + 1 + fournisseur->delai_de_paiement);
     achat.mois_creation = mois_command;
     achat.type = OPERATION_DEPENSE;
     achat.value = lot * prix_lot_accessoires(fournisseur);
-    set_mois_application(&achat, mois_command + fournisseur->delai_de_paiement, mois_command + fournisseur->delai_de_paiement + 1);
+    set_mois_application(&achat, mois_command + 1 + fournisseur->delai_de_paiement, mois_command + fournisseur->delai_de_paiement + 2);
 
     add_operation(entreprise, achat);
 
-    for(int i = mois_command + 1; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) { // TO CHECK
+    for(int i = mois_command + 1; i < NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE; i++) {
         entreprise->mois[i].nb_accessoire += lot * fournisseur->taille_lot_accessoires;
     }
 }
@@ -457,7 +480,7 @@ void etude_marche_sensibilite_client(Entreprise *entreprise, int mois_achat) {
     snprintf(op.desc, sizeof(op.desc), "Etude sensibilite client fait le mois %d, coût %d€", mois_achat, ETUDE_SENSIBILITE_CLIENTS);
     op.mois_creation = mois_achat;
     op.type = OPERATION_DEPENSE;
-    op.value = ETUDE_SENSIBILITE_CLIENTS;
+    op.value = ETUDE_SENSIBILITE_CLIENTS * TVA;
     set_mois_application(&op, mois_achat, mois_achat + 1);
 
     add_operation(entreprise, op);
@@ -469,7 +492,7 @@ void etude_marche_pub(Entreprise *entreprise, int mois_achat) {
     snprintf(op.desc, sizeof(op.desc), "Etude marche pub fait le mois %d, coût %d€", mois_achat, ETUDE_PUBLICITE);
     op.mois_creation = mois_achat;
     op.type = OPERATION_DEPENSE;
-    op.value = ETUDE_PUBLICITE;
+    op.value = ETUDE_PUBLICITE * TVA;
     set_mois_application(&op, mois_achat, mois_achat + 1);
 
     add_operation(entreprise, op);
@@ -481,7 +504,7 @@ void pubs(Entreprise *entreprise, int mois_achat, int valeur) {
     snprintf(op.desc, sizeof(op.desc), "Pubs faite le mois %d, coût %d€", mois_achat, valeur);
     op.mois_creation = mois_achat;
     op.type = OPERATION_DEPENSE;
-    op.value = valeur;
+    op.value = valeur * TVA;
     set_mois_application(&op, mois_achat, mois_achat + 1);
 
     add_operation(entreprise, op);
