@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 void init_entreprise(Entreprise *entreprise){
     char* nom_mois[NB_MOIS_DANS_ANNEE] = {"Jan", "Fev", "Mar", "Avr", "Mai", "Juin", "Juil", "Aout", "Sep", "Oct", "Nov", "Dec"};
@@ -405,7 +406,7 @@ void acheter_aluminium(Entreprise *entreprise, const Fournisseur *fournisseur, i
     snprintf(achat.desc, sizeof(achat.desc), "Achat %i lots d'alu fait le mois %d, paiement le mois %d", lot, mois_command, mois_command + 1 + fournisseur->delai_de_paiement);
     achat.mois_creation = mois_command;
     achat.type = OPERATION_DEPENSE;
-    achat.value = lot * prix_lot_aluminium(fournisseur);
+    achat.value = lot * prix_lot_aluminium(fournisseur) * TVA;
     set_mois_application(&achat, mois_command + 1 + fournisseur->delai_de_paiement, mois_command + fournisseur->delai_de_paiement + 2);
 
     add_operation(entreprise, achat);
@@ -421,7 +422,7 @@ void acheter_accessoire(Entreprise *entreprise, const Fournisseur *fournisseur, 
     snprintf(achat.desc, sizeof(achat.desc), "Achat %i lots d'acc fait le mois %d, paiement le mois %d", lot, mois_command, mois_command + 1 + fournisseur->delai_de_paiement);
     achat.mois_creation = mois_command;
     achat.type = OPERATION_DEPENSE;
-    achat.value = lot * prix_lot_accessoires(fournisseur);
+    achat.value = lot * prix_lot_accessoires(fournisseur) * TVA;
     set_mois_application(&achat, mois_command + 1 + fournisseur->delai_de_paiement, mois_command + fournisseur->delai_de_paiement + 2);
 
     add_operation(entreprise, achat);
@@ -508,4 +509,40 @@ void pubs(Entreprise *entreprise, int mois_achat, int valeur) {
     set_mois_application(&op, mois_achat, mois_achat + 1);
 
     add_operation(entreprise, op);
+}
+
+/**
+ * taux: in %
+ * duree: in month, mois_emptrunts + duree is the last month to repay
+ */
+void emprunts(Entreprise *entreprise, float montant, float taux, int mois_emprunts, int duree){
+
+    Operation emprunt = {
+        .name = "Emprunt",
+        .type = OPERATION_BENEF,
+        .mois_creation = mois_emprunts,
+        .value = montant,
+    };
+
+    set_mois_application(&emprunt, mois_emprunts, mois_emprunts + 1);
+
+    float value_total = montant * (1 + taux / 100);
+    if(taux != 0) {
+        float r = taux / 100.0f;
+        float i = powf(1.0f + r, 1.0f/12.0f) - 1.0f;
+        float M = montant * i / (1.0f - powf(1.0f + i, - duree));
+        value_total = M * duree;
+    }
+
+    Operation repay = {
+        .name = "Remboursement",
+        .type = OPERATION_DEPENSE,
+        .mois_creation = mois_emprunts,
+        .value = value_total,
+    };
+
+    set_mois_application(&repay, mois_emprunts, mois_emprunts + duree);
+
+    add_operation(entreprise, emprunt);
+    add_operation(entreprise, repay);
 }

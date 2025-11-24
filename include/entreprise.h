@@ -78,4 +78,6 @@ void etude_marche_pub(Entreprise *entreprise, int mois_achat);
 
 void pubs(Entreprise *entreprise, int mois_achat, int valeur);
 
+void emprunts(Entreprise *entreprise, float montant, float taux, int mois_emprunts, int duree);
+
 #endif
