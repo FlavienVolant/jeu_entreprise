@@ -14,8 +14,8 @@ typedef struct {
 float prix_lot_accessoires(const Fournisseur *fournisseur);
 float prix_lot_aluminium(const Fournisseur *fournisseur);
 
-extern const Fournisseur AluStar;
-extern const Fournisseur FourniStyl;
-extern const Fournisseur Topmatex;
+extern Fournisseur AluStar;
+extern Fournisseur FourniStyl;
+extern Fournisseur Topmatex;
 
 #endif

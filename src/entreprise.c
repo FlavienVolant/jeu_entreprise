@@ -455,6 +455,17 @@ void etude_marche_sensibilite_client(Entreprise *entreprise, int mois_achat) {
     add_operation(entreprise, op);
 }
 
+void etude_marche_prix(Entreprise *entreprise, int mois_achat) {
+    Operation op;
+    op.name = "Etude marche prix";
+    op.mois_creation = mois_achat;
+    op.type = OPERATION_DEPENSE;
+    op.value_month = ETUDE_PRIX * TVA;
+    set_mois_application(&op, mois_achat, mois_achat + 1);
+
+    add_operation(entreprise, op);
+}
+
 void etude_marche_pub(Entreprise *entreprise, int mois_achat) {
     Operation op;
     op.name = "Etude marche pub";

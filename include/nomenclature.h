@@ -12,7 +12,7 @@ typedef struct {
     int cout_logistique;
 } Nomenclature;
 
-extern const Nomenclature ultra_char;
-extern const Nomenclature hydro_boat;
+extern Nomenclature ultra_char;
+extern Nomenclature hydro_boat;
 
 #endif

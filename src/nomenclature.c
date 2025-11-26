@@ -1,6 +1,6 @@
 #include "nomenclature.h"
 
-const Nomenclature ultra_char = {
+Nomenclature ultra_char = {
     .type = TYPE_ULTRA_CHAR,
     .temps_de_production = 0.5f,
     .conso_accessoires = 1,
@@ -8,7 +8,7 @@ const Nomenclature ultra_char = {
     .cout_logistique = 5,
 };
 
-const Nomenclature hydro_boat = {
+Nomenclature hydro_boat = {
     .type = TYPE_HYDRO_BOAT,
     .temps_de_production = 10.0f,
     .conso_accessoires = 6.0,
