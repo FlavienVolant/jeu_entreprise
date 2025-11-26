@@ -37,6 +37,7 @@ typedef struct {
     Mois mois[NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE];
     Operation operations[OPERATION_LEN];
     int nb_operation;
+    float placement;
 } Entreprise;
 
 
@@ -81,5 +82,9 @@ void pubs(Entreprise *entreprise, int mois_achat, int valeur);
 void emprunts(Entreprise *entreprise, float montant, float taux, int mois_emprunts, int duree);
 
 void autre_entree(Entreprise *entreprise, float montant, int mois_arrive);
+
+void placer(Entreprise *entreprise, float montant, int mois_arrive);
+void fruictifier(Entreprise *entreprise);
+void retirer(Entreprise *entreprise, float montant, int mois_arrive);
 
 #endif

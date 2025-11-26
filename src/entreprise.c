@@ -17,6 +17,7 @@ void init_entreprise(Entreprise *entreprise){
         entreprise->mois[i] = current;
     }
     
+    entreprise->placement = 0;
     entreprise->nb_operation = 0;
 }
 
@@ -68,6 +69,7 @@ void display_entreprise(const Entreprise *entreprise, int annee, float capital_d
     }
 
     printf("+-------+-----------------+-----------------+-----------------+-----------------+------------+------------+-----------------+-----------------+------------+------------+\n");
+    printf("placement->%f\n", entreprise->placement);
 }
 
 void __display_operation(const Operation *op, int annee){
@@ -532,4 +534,18 @@ void autre_entree(Entreprise *entreprise, float montant, int mois_arrive){
     };
     set_mois_application(&entree, mois_arrive, mois_arrive + 1);
     add_operation(entreprise, entree);     
+}
+
+void placer(Entreprise *entreprise, float montant, int mois_arrive){
+    entreprise->mois[mois_arrive].depense += montant;
+    entreprise->placement += montant;
+}
+
+void fruictifier(Entreprise *entreprise) {
+    entreprise->placement *= powf(1.02f, 1.0f / 12.0f);
+}
+
+void retirer(Entreprise *entreprise, float montant, int mois_arrive){
+    entreprise->mois[mois_arrive].benef += montant;
+    entreprise->placement -= montant;
 }

@@ -251,6 +251,9 @@ int main(){
 
     pubs(entreprise, 7, 18000 + 4500); // 2% commissions
 
+    placer(entreprise, 100000, 7);
+    fruictifier(entreprise);
+
     acheter_accessoire(entreprise, &AluStar, 7, 1);
 
     display_operations(entreprise, 0);
