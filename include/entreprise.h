@@ -27,11 +27,10 @@ typedef struct {
 
 typedef struct {
     char *name;
-    char desc[128];
     int type; // OPERATION_BENEF OPERATION_DEPENSE
     int mois_creation;
     int mois_application[NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE];
-    float value;
+    float value_month;
 } Operation;
 
 typedef struct {
@@ -79,5 +78,7 @@ void etude_marche_pub(Entreprise *entreprise, int mois_achat);
 void pubs(Entreprise *entreprise, int mois_achat, int valeur);
 
 void emprunts(Entreprise *entreprise, float montant, float taux, int mois_emprunts, int duree);
+
+void autre_entree(Entreprise *entreprise, float montant, int mois_arrive);
 
 #endif

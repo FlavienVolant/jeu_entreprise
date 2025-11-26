@@ -20,7 +20,7 @@ int main(){
         .name = "terrain_locaux",
         .type = OPERATION_DEPENSE,
         .mois_creation = 0,
-        .value = 160000 * TVA,
+        .value_month = 160000 * TVA,
     };
 
     set_mois_application(&terain_locaux, 0, 1);
@@ -29,7 +29,7 @@ int main(){
         .name = "Frais de structure",
         .type = OPERATION_DEPENSE,
         .mois_creation = 0,
-        .value = COUT_FIXE_STRUCTURE * TVA * NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE, // pour avoir COUT_FIXE_STRUCTURE par mois
+        .value_month = COUT_FIXE_STRUCTURE * TVA, // pour avoir COUT_FIXE_STRUCTURE par mois
     };
 
     set_mois_application(&frais_de_structure, 0, NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE);
@@ -40,7 +40,7 @@ int main(){
     acheter_aluminium(entreprise, &FourniStyl, 0, 1);
 
     emprunts(entreprise, 90000, 0, 0, NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE);
-    emprunts(entreprise, 60000, 4, 1, NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE - 1);
+    emprunts(entreprise, 60000, 4, 1, NB_ANNEE_JOUE * NB_MOIS_DANS_ANNEE);
     add_operation(entreprise, frais_de_structure);
     
     acheter_une_machine(entreprise, 0);
@@ -57,15 +57,7 @@ int main(){
     acheter_accessoire(entreprise, &AluStar, 1, 1);
     acheter_aluminium(entreprise, &FourniStyl, 1, 2);
 
-    Operation remboursement_tva_1 = {
-        .name = "Remboursement TVA",
-        .type = OPERATION_BENEF,
-        .mois_creation = 1,
-        .value = 33400,
-    };
-
-    set_mois_application(&remboursement_tva_1, 1, 2);
-    add_operation(entreprise, remboursement_tva_1);
+    autre_entree(entreprise, 33400, 1);
 
     produire_ultra_char(entreprise, 1, 2000);
     vendre_ultra_char(entreprise, 1, 45, 60, 1606);
@@ -82,49 +74,25 @@ int main(){
 
     pubs(entreprise, 2, 20000);
 
-    Operation remboursement_tva_2 = {
-        .name = "Remboursement TVA",
-        .type = OPERATION_BENEF,
-        .mois_creation = 1,
-        .value = 13234,
-    };
-
-    set_mois_application(&remboursement_tva_2, 2, 3);
-    add_operation(entreprise, remboursement_tva_2);
+    autre_entree(entreprise, 13234, 2);
 
     Operation marchandise_janvier = {
         .name = "Paiement des marchandises",
         .type = OPERATION_DEPENSE,
         .mois_creation = 2,
-        .value = 108000,
+        .value_month = 108000,
     };
 
     set_mois_application(&marchandise_janvier, 2, 3);
     add_operation(entreprise, marchandise_janvier);
 
     // mois Avril
-    vendre_ultra_char(entreprise, 3, 45, 30, 2011);
+    vendre_ultra_char(entreprise, 3, 30, 47, 2011);
     pubs(entreprise, 3, 10000);
     pubs(entreprise, 3, 5000);
     etude_marche_pub(entreprise, 3);
 
-    Operation inflows = {
-        .name = "Other inflows",
-        .type = OPERATION_BENEF,
-        .mois_creation = 3,
-        .value = 121153,
-    };
-    set_mois_application(&inflows, 3, 4);
-    add_operation(entreprise, inflows);    
-
-    Operation tva_hot_fix = {
-        .name = "tva_hot_fix",
-        .type = OPERATION_DEPENSE,
-        .mois_creation = 3,
-        .value = 7000,
-    };
-    set_mois_application(&tva_hot_fix, 3, 4);
-    add_operation(entreprise, tva_hot_fix);    
+    autre_entree(entreprise, 121153, 3);
 
     produire_hydro_boat(entreprise, 3, 200);
 
@@ -132,19 +100,33 @@ int main(){
 
     // mois mai
 
-    // produire_ultra_char(entreprise, 4, 2200);
-    // acheter_aluminium(entreprise, &AluStar, 4, 1);
-    // acheter_accessoire(entreprise, &AluStar, 4, 1);
+    produire_ultra_char(entreprise, 4, 2200);
+    acheter_aluminium(entreprise, &AluStar, 4, 1);
+    acheter_accessoire(entreprise, &AluStar, 4, 1);
 
-    // pubs(entreprise, 4, 5000);
-    // pubs(entreprise, 4, 15000);
+    pubs(entreprise, 4, 4500);
+    pubs(entreprise, 4, 14500);
 
-    // vendre_ultra_char(entreprise, 4, 30, 47, 2200);
-    // vendre_hydro_boat(entreprise, 4, 30, 700, 200);
+    Operation commission = {
+        .name = "Commission Mai",
+        .type = OPERATION_DEPENSE,
+        .mois_creation = 4,
+        .value_month = 1217,
+    };
+
+    set_mois_application(&commission, 4, 5);
+    add_operation(entreprise, commission);
+
+    vendre_ultra_char(entreprise, 4, 30, 47, 2200);
+    vendre_hydro_boat(entreprise, 4, 30, 700, 200);
+
+    emprunts(entreprise, 60000, 8, 4, 36);
+
+    autre_entree(entreprise, 1008, 4);
 
     display_operations(entreprise, 0);
     display_entreprise(entreprise, 0, 500000);
-    display_operations_annee_mois(entreprise, 0, 3);
+    display_operations_annee_mois(entreprise, 0, 4);
 
     return 0;
 }
